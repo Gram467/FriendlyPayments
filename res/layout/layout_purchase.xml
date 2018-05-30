@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center">
+
+<FrameLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/imageview_cover_art"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
+
+    <TextView
+        android:id="@+id/PNr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="casual"
+        android:gravity="center_horizontal"
+        android:textSize="30sp"
+        android:textStyle="bold" />
+
+</FrameLayout>
+
+<TextView
+    android:id="@+id/textview_purchase_desc"
+    android:layout_width="wrap_content"
+    android:layout_height="40dp"
+    android:textSize="12sp"
+    tools:text="Are You My Mother"
+    android:fontFamily="casual"
+    android:textStyle="bold"
+    android:paddingTop="4dp"
+    android:paddingLeft="8dp"
+    android:paddingRight="8dp"
+    android:gravity="center_horizontal"/>
+
+</LinearLayout>
