@@ -10,8 +10,8 @@ import android.widget.TextView;
 
 import java.text.DecimalFormat;
 
+// fills frame for each item in purchase
 public class ItemAdapter extends BaseAdapter {
-
     private final Context mContext;
     private final ItemSupport[] items;
     public static int[] correctitem;// = new int[1024];

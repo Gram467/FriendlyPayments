@@ -29,7 +29,6 @@ public class ContactList extends AppCompatActivity {
 
     public void Setup() {
         DBHandler db = new DBHandler(this, null, null, 1);
-
         db.loadAllContacts(); // To get number of contacts
         db.loadContactInfo(); // get contact values
 
@@ -46,9 +45,8 @@ public class ContactList extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
                 Intent Intent = new Intent(ContactList.this, AddContact.class);
-                Intent.putExtra("caller", "CList_Edit");
+                Intent.putExtra("caller", "CList_Edit"); // mapping where user came from
                 startActivity(Intent);
 
                 contactID = DBHandler.CustID[position + 1];
@@ -63,7 +61,7 @@ public class ContactList extends AppCompatActivity {
 
     public void EditUser (View view) {
         Intent Intent = new Intent(ContactList.this, AddContact.class);
-        Intent.putExtra("caller", "CList_EditUser");
+        Intent.putExtra("caller", "CList_EditUser"); // mapping where user came from
         startActivity(Intent);
     }
 

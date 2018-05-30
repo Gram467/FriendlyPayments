@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+// fills frame for each contact in purchase
 public class ContactAdapter extends BaseAdapter{
     private final Context mContext;
     private final ContactSupport[] contacts;
@@ -28,7 +29,6 @@ public class ContactAdapter extends BaseAdapter{
 
     @Override
     public View getView(int pos, View convertView, ViewGroup parent) {
-//        ContactSupport contact = contacts[pos];
 
         int Actual_ID = rightContact[pos];
         if (convertView == null) {
@@ -43,12 +43,12 @@ public class ContactAdapter extends BaseAdapter{
         }
 
         final ViewHolder viewHolder = (ViewHolder)convertView.getTag();
-
         DBHandler db = new DBHandler(this.mContext, null, null, 1);
 
         viewHolder.nameTextView.setText(db.loadContactName(Actual_ID));
         viewHolder.surnameTextView.setText(db.loadContactSurname(Actual_ID));
 
+        db.close();
         return convertView;
     }
 

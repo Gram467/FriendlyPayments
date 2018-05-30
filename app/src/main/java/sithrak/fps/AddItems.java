@@ -40,27 +40,25 @@ public class AddItems extends AppCompatActivity {
         quantity = findViewById(R.id.quantity);
         dropdown = findViewById(R.id.spinner_cat);
 
-        // needed for studying
+        // mapping where user came from
         if (getIntent().getStringExtra("caller") == null) {
             caller = "";
         } else {
             caller = getIntent().getStringExtra("caller");
         }
-
         // fill dropdown with category choices
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, items);
         dropdown.setAdapter(adapter);
     }
 
     public void addItem(View view) {
-
         DBHandler dbItem = new DBHandler(this, null, null, 1);
         float val;
         int count;
 
         String name = namae.getText().toString();
         // get field values
-        DecimalFormat dec = new DecimalFormat("#.##");
+        DecimalFormat dec = new DecimalFormat("#.##"); // sets output format
         if (price.getText().toString().equals("")) { val = 0; }
             else {
                 val = Float.parseFloat((price.getText().toString())
@@ -80,28 +78,26 @@ public class AddItems extends AppCompatActivity {
         ItemSupport item = new ItemSupport(name, count, type, value);
         dbItem.addItem(item);
 
-        // Selection of a specific item
-        // Needed to assign several items to the same purchase id from one add item view
-        // (not necessarily needed, but don't really have the leisure to fix it right now)
+        // Selects the created item and adds it to Helper table
         SQLiteDatabase db = dbItem.getReadableDatabase();
         String result = "";
         int id = 0;
         String query = "SELECT " + DBHandler.COL_ITEMID + " from " + DBHandler.ITEM_TABLE +
-                " WHERE " + DBHandler.ITEM_NAME + " = '" + item.getIName() + "' AND " +
-                DBHandler.ITEM_PIC + " = '" + item.getCategory() + "'";
+                    " WHERE " + DBHandler.ITEM_NAME + " = '" + item.getIName() + "' AND " +
+                    DBHandler.ITEM_PIC + " = '" + item.getCategory() + "'";
 
         Cursor cursor = db.rawQuery(query, null);
         while (cursor.moveToNext()){
             id = cursor.getInt(0);
-                result = String.valueOf(id);
+            result = String.valueOf(id);
         }
-            int itemnum = Integer.parseInt(result.replaceAll("[\\D]", ""));
-        cursor.close();
-        db.close();
-        dbItem.close();
+        int itemnum = Integer.parseInt(result.replaceAll("[\\D]", ""));
 
         Items[PurchaseItemPosition] = itemnum;
         PurchaseItemPosition++;
+        cursor.close();
+        db.close();
+        dbItem.close();
 
         if (caller.equals("EditPurchase")) {
             AITH();
@@ -111,8 +107,8 @@ public class AddItems extends AppCompatActivity {
         finish();
     }
 
+    // Add Item To Helper
     private void AITH() {
-
         DBHandler dbHelp = new DBHandler(this, null, null, 1);
         ItemAdapter.correctitem = new int[1024];
 
@@ -123,8 +119,6 @@ public class AddItems extends AppCompatActivity {
                 ItemAdapter.correctitem[i] = Items[i];
             }
         }
-
         dbHelp.close();
     }
-
 }

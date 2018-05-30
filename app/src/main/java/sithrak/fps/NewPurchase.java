@@ -13,7 +13,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class NewPurchase extends AppCompatActivity {
-
     GridView ItemGrid, ContactGrid;
     EditText Description;
     public static int[] Items;// = new int[1024];
@@ -46,11 +45,8 @@ public class NewPurchase extends AppCompatActivity {
         ShowItemz();
     }
 
-    // to call the function via button from xml
-    public void ShowItems(View view) { ShowItemz(); }
-
+    // loads purchase information
     public void ShowItemz() {
-
         ATH();     //all good in here
         DBHandler db = new DBHandler(this, null, null, 1);
 
@@ -111,10 +107,9 @@ public class NewPurchase extends AppCompatActivity {
                 " WHERE " + DBHandler.COL_DESC + " = '" + DBHandler.impossible + "'";
 
         Cursor cursor = dbz.rawQuery(query, null);
-            while (cursor.moveToNext()){
-                PurchaseID = cursor.getInt(0);
-            }
-
+        while (cursor.moveToNext()){
+            PurchaseID = cursor.getInt(0);
+        }
         dbPurch.close();
         cursor.close();
         dbz.close();
@@ -126,8 +121,7 @@ public class NewPurchase extends AppCompatActivity {
         startActivity(Intent);
     }
 
-
-
+    // saves the purchase
     public void UpdatePurchase(View view) {
         aNumberForUpdate++;
         PurchCheck();
@@ -135,10 +129,9 @@ public class NewPurchase extends AppCompatActivity {
         finish();
     }
 
+    // depending on user actions saves or deletes the purchase
     public void PurchCheck() {
-
         DBHandler db = new DBHandler(this, null, null, 1);
-
         if (aNumberForUpdate > 1) {
             description = DBHandler.impossible;
             UpdPurch();
@@ -153,17 +146,16 @@ public class NewPurchase extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         int count = getFragmentManager().getBackStackEntryCount();
-
         if (count == 0) {
             super.onBackPressed();
-            PurchCheck();
+            PurchCheck(); // since user hasn't pressed save, purchase will be deleted
         } else {
             getFragmentManager().popBackStack();
         }
     }
 
+    // updates purchase description
     public void UpdPurch() {
-
         DBHandler db = new DBHandler(this, null, null, 1);
         SQLiteDatabase dbz = db.getWritableDatabase();
 
@@ -176,7 +168,6 @@ public class NewPurchase extends AppCompatActivity {
         }
 
         description = Description.getText().toString();
-
         db.updatePurchase(purchase, description);
 
         dbz.close();
@@ -187,5 +178,4 @@ public class NewPurchase extends AppCompatActivity {
         Intent contact = new Intent(this, AddContact.class);
         startActivity(contact);
     }
-
 }

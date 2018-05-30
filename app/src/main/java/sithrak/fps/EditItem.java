@@ -1,6 +1,5 @@
 package sithrak.fps;
 
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -39,38 +38,32 @@ public class EditItem extends AppCompatActivity{
     }
 
     public void Load(int id) {
-
         DBHandler db = new DBHandler(this, null, null, 1);
 
         name.setText(db.loadItemName(id));
         price.setText(String.valueOf(ItemAdapter.smallCheck(String.valueOf(db.loadItemPrice(id)))));
         quantity.setText(String.valueOf(db.loadItemQuantity(id)));
-        category.getSelectedItem();
+        category.getSelectedItem(); // doesn't load the right id in spinner
 
         db.close();
     }
 
+    // to be called via button
     public void Update(View view) {
-        UpdItem(purchase_identification_number, item_identification_number);
+        UpdItem(item_identification_number);
         Toast.makeText(this, "Item succesfully updated.", Toast.LENGTH_SHORT).show();
         finish();
     }
 
-    public void UpdItem(int PiD, int IiD) {
-
+    // updates item info
+    public void UpdItem(int IiD) {
         DBHandler db = new DBHandler(this, null, null, 1);
         SQLiteDatabase dbz = db.getWritableDatabase();
 
-        String Query = "Select * From " + DBHandler.H_TABLE + " WHERE " + DBHandler.COL_ID + " = '" + PiD + "' AND " + DBHandler.COL_ITEMID + " = '" + IiD + "'";
-        Cursor cursor = dbz.rawQuery(Query, null);
-
         DecimalFormat dec = new DecimalFormat("#.##");
 
-        while (cursor.moveToNext()) {}
-
         String item = name.getText().toString();
-        float val = Float.parseFloat(price.getText().toString());
-            float value = Float.valueOf(dec.format(val));
+        float value = Float.valueOf(dec.format(Float.parseFloat(price.getText().toString())));
         int count = Integer.parseInt(quantity.getText().toString());
         String type = String.valueOf(category.getSelectedItem());
 
@@ -80,9 +73,9 @@ public class EditItem extends AppCompatActivity{
         db.close();
     }
 
+    // deletes item
     public void DelItem(View view) {
         DBHandler db = new DBHandler(this, null, null, 1);
-
         db.deleteItemFromHelper(purchase_identification_number,item_identification_number);
         db.deleteItem(item_identification_number);
 

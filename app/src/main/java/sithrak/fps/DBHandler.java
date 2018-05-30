@@ -42,7 +42,6 @@ public class DBHandler extends SQLiteOpenHelper {
     // a workaround to create frames for History
     private static int unknown; // used for calculating amount of purchases and items
     private static int contactsInPurchase;
-//    public static Integer pnum;
     public static PurchSupport[] purchases = new PurchSupport[unknown];
     public static ItemSupport[] items = new ItemSupport[unknown];
     public static ContactSupport[] contacts = new ContactSupport[contactsInPurchase];
@@ -62,6 +61,9 @@ public class DBHandler extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         Tables(db);
+        String sql = "INSERT OR REPLACE INTO " + CON_TABLE + " (" + COL_CONTID + ", " + CON_FNAME + ", " + CON_LNAME + ", " + CON_NUM + ", " + CON_EMAIL + ", " + CON_BNAME + ", " + CON_BNUM + ", " + CON_PASS + ") VALUES " +
+                "('1','', '', '', '', '', '', '')";
+        db.execSQL(sql);
     }
 
     @Override
@@ -108,9 +110,7 @@ public class DBHandler extends SQLiteOpenHelper {
                 "PRIMARY KEY( " + COL_ITEMID + ", " + COL_CONTID + ", "  + COL_ID + ")" + ")";
         db.execSQL(CREATE_H_TABLE);
 
-        String sql = "INSERT OR REPLACE INTO " + CON_TABLE + " (" + COL_CONTID + ", " + CON_FNAME + ", " + CON_LNAME + ", " + CON_NUM + ", " + CON_EMAIL + ", " + CON_BNAME + ", " + CON_BNUM + ", " + CON_PASS + ") VALUES " +
-                "('1','', '', '', '', '', '', '')";
-//        db.execSQL(sql);
+
     }
 
     public void loadItemsForPurchase(int PiD) {
@@ -356,7 +356,7 @@ public class DBHandler extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery(Query, null);
 
         while (cursor.moveToNext()) {
-            if (num == 0) {/*Do Nothing, ID for user*/
+            if (num == 0) { // skips first contact (the user)
             num++;}
             else {
                 contactsArray[num - 1] = cursor.getString(1) + ", " + cursor.getString(2);
@@ -397,6 +397,7 @@ public class DBHandler extends SQLiteOpenHelper {
         db.close();
     }
 
+    // add contact to table
     public void addContact(ContactSupport contact) {
         ContentValues val = new ContentValues();
             val.put(CON_FNAME, contact.getCName());
@@ -447,7 +448,7 @@ public class DBHandler extends SQLiteOpenHelper {
         db.close();
     }
 
-    //gets specific purchase
+    // loads description of a specific purchase
     public String getDesc(int num) {
         SQLiteDatabase db = this.getReadableDatabase();
         String Query = "Select * FROM " + PURC_TABLE + " WHERE " + COL_ID + " = '" + num + "'";
@@ -486,6 +487,7 @@ public class DBHandler extends SQLiteOpenHelper {
         return purchases;
     }
 
+    // creates a frame for each item
     public ItemSupport[] makeItems() {
         items = new ItemSupport[unknown];
         for (int i = 0; i < unknown; i++) {
@@ -494,6 +496,7 @@ public class DBHandler extends SQLiteOpenHelper {
         return items;
     }
 
+    // creates a frame for each contact
     public ContactSupport[] makeContacts() {
         contacts = new ContactSupport[contactsInPurchase];
         for (int i = 0; i < contactsInPurchase; i++) {
@@ -502,6 +505,7 @@ public class DBHandler extends SQLiteOpenHelper {
         return contacts;
     }
 
+    // updates purchase information
     public void updatePurchase (int ID, String desc) {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -512,6 +516,7 @@ public class DBHandler extends SQLiteOpenHelper {
         db.close();
     }
 
+    // updates item information
     public void updateItem (int ID, String name, float price, int quantity, String category) {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -525,6 +530,7 @@ public class DBHandler extends SQLiteOpenHelper {
         db.close();
     }
 
+    // updates contact information
     public void updateContact (int ID, String name, String surname, int num, String email, String bn, String ban, String pass) {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -541,8 +547,8 @@ public class DBHandler extends SQLiteOpenHelper {
         db.close();
     }
 
+    // completely removes purchase
     public void DeleteP(int PiD) {
-
         loadItemsForPurchase(PiD); // get items of current purchase
         deletePurchase(PiD);
         deletePurchaseFromHelper(PiD);
@@ -557,6 +563,7 @@ public class DBHandler extends SQLiteOpenHelper {
         // delteContacts(PiD);
     }
 
+    // removes purchase from helper
     public void deletePurchaseFromHelper(int ID) {
         String Query = "Select * From " + H_TABLE + " WHERE " + COL_ID + " = '" + String.valueOf(ID) + "'";
         SQLiteDatabase db = this.getWritableDatabase();
@@ -573,6 +580,7 @@ public class DBHandler extends SQLiteOpenHelper {
         db.close();
     }
 
+    // removes items in purchase from helper
     public void deleteItemFromHelper(int PiD, int IiD) {
         String Query = "Select * From " + H_TABLE + " WHERE " + COL_ID + " = '" + String.valueOf(PiD) + "' AND " + COL_ITEMID + " = '" + String.valueOf(IiD) + "'";
         SQLiteDatabase db = this.getWritableDatabase();
@@ -589,6 +597,22 @@ public class DBHandler extends SQLiteOpenHelper {
         db.close();
     }
 
+    // deletes contact from purchase (helper table)
+    public void removeContact(int PiD, int CiD) {
+        String query = "Select * from " + H_TABLE + " where " + COL_ID + " = '" + String.valueOf(PiD) + "' AND " + COL_CONTID + " = '" + CiD + "'";
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(query, null);
+
+        ContactSupport contact = new ContactSupport();
+        while (cursor.moveToNext()) {
+            contact.setContactID(cursor.getInt(0));
+            db.delete(H_TABLE, COL_CONTID + " = " + CiD, null);
+        }
+        cursor.close();
+        db.close();
+    }
+
+    // deletes item from item table
     public void deleteItem(int ID) {
         String Query = "Select * From " + ITEM_TABLE + " WHERE " + COL_ITEMID + " = '" + String.valueOf(ID) + "'";
         SQLiteDatabase db = this.getWritableDatabase();
@@ -604,6 +628,7 @@ public class DBHandler extends SQLiteOpenHelper {
         db.close();
     }
 
+    // deletes purchase from purchases table
     public void deletePurchase(int ID) {
         String query = "SELECT * FROM " + PURC_TABLE + " WHERE " + COL_ID + " = '" + String.valueOf(ID) + "'";
         SQLiteDatabase db = this.getWritableDatabase();
@@ -619,4 +644,18 @@ public class DBHandler extends SQLiteOpenHelper {
         db.close();
     }
 
+    // deletes contact
+    public void deleteContact(int ID) {
+        String query = "Select * from " + CON_TABLE + " where " + COL_CONTID + " = '" + String.valueOf(ID) + "'";
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(query, null);
+
+        ContactSupport contact = new ContactSupport();
+        while (cursor.moveToNext()) {
+            contact.setContactID(cursor.getInt(0));
+            db.delete(CON_TABLE, COL_CONTID + " = " + ID, null);
+        }
+        cursor.close();
+        db.close();
+    }
 }

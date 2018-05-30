@@ -9,10 +9,10 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+// fills frame with purchase info
 public class PurchaseAdapter extends BaseAdapter{
     private final Context mContext;
     private final PurchSupport[] purchases;
-//    private static final String desc = "";
 
     public PurchaseAdapter(Context context, PurchSupport[] purchase){
         this.mContext = context;

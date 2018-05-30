@@ -58,36 +58,35 @@ public class AddContact extends AppCompatActivity{
         if (getIntent().getStringExtra("caller") == null) {
             caller = "";
             NotUser();
-
-            btnAdd.setVisibility(View.VISIBLE);
-            btnEdit.setVisibility(View.INVISIBLE);
-            btnDelete.setVisibility(View.INVISIBLE);
-
+            Add();
         } else {
             caller = getIntent().getStringExtra("caller");
-        }
 
-        if (caller.equals("CList_EditUser")) {
-            aBar.setTitle(" Edit User Data");
-            Inputbn.setVisibility(View.VISIBLE);
-            Inputban.setVisibility(View.VISIBLE);
-            InputPassword.setVisibility(View.VISIBLE);
-            DesBN.setVisibility(View.VISIBLE);
-            DesBAN.setVisibility(View.VISIBLE);
-            DesPass.setVisibility(View.VISIBLE);
+            if (caller.equals("EditPurchase")) {
+            NotUser(); //caller hasn't been initiated, user is adding a new contact
+            Add();
+            } else if (caller.equals("CList_EditUser")) {
+                aBar.setTitle(" Edit User Data");
+                Inputbn.setVisibility(View.VISIBLE);
+                Inputban.setVisibility(View.VISIBLE);
+                InputPassword.setVisibility(View.VISIBLE);
+                DesBN.setVisibility(View.VISIBLE);
+                DesBAN.setVisibility(View.VISIBLE);
+                DesPass.setVisibility(View.VISIBLE);
 
-            btnAdd.setVisibility(View.INVISIBLE);
-            btnEdit.setVisibility(View.VISIBLE);
-            btnDelete.setVisibility(View.INVISIBLE);
+                btnAdd.setVisibility(View.INVISIBLE);
+                btnEdit.setVisibility(View.VISIBLE);
+                btnDelete.setVisibility(View.INVISIBLE);
 
-            Editing();
-
-        } else if (caller.equals("CList_Edit")) {
-            NotUser();
-            Editing();
+                Editing();
+            } else if (caller.equals("CList_Edit")) {
+                NotUser();
+                Editing();
+            }
         }
     }
 
+    // hide unnecessary fields
     public void NotUser () {
         Inputbn.setVisibility(View.INVISIBLE);
         Inputban.setVisibility(View.INVISIBLE);
@@ -101,10 +100,15 @@ public class AddContact extends AppCompatActivity{
         btnDelete.setVisibility(View.VISIBLE);
     }
 
+    public void Add() {
+        btnAdd.setVisibility(View.VISIBLE);
+        btnEdit.setVisibility(View.INVISIBLE);
+        btnDelete.setVisibility(View.INVISIBLE);
+    }
+
     public void Editing () {
         DBHandler db = new DBHandler(this, null, null, 1);
         // fill editable values
-
         if (caller.equals("CList_EditUser")) {
             contactID = 1;
         }
@@ -124,6 +128,7 @@ public class AddContact extends AppCompatActivity{
         String name, surname, email;
         int number;
 
+        // set values if fields are empty
         name = InputName.getText().toString(); if (InputName.getText().toString().equals("")) { name = "something"; }
         surname = InputSurname.getText().toString(); if (InputSurname.getText().toString().equals("")) { surname = ""; }
         if (InputNumber.getText().toString().equals("")) { number = 0; }
@@ -133,12 +138,12 @@ public class AddContact extends AppCompatActivity{
         ContactSupport contact = new ContactSupport(name, surname, number, email, "", "", "");
         dbHandler.addContact(contact);
 
+        // find latest contact & add it to purchase
         SQLiteDatabase db = dbHandler.getReadableDatabase();
         String res = "";
         int id, num;
         String query = "SELECT * FROM " + DBHandler.CON_TABLE + " WHERE " + DBHandler.CON_FNAME + " = '" + contact.getCName() + "' AND " + DBHandler.CON_LNAME + " = '" + contact.getCSurname() + "'";
         Cursor cursor = db.rawQuery(query, null);
-
         while (cursor.moveToNext()) {
             id = cursor.getInt(0);
             res = String.valueOf(id);
@@ -147,13 +152,15 @@ public class AddContact extends AppCompatActivity{
         cursor.close();
         db.close();
         dbHandler.close();
+
         Contacts[PurchaseContactPosition] = num;
         PurchaseContactPosition++;
+
         if (caller.equals("EditPurchase")) {
             ACTH();
         }
 
-        Toast.makeText(this, "Contact has been added.",Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Contact has been added.", Toast.LENGTH_SHORT).show();
         finish();
     }
 
@@ -178,6 +185,7 @@ public class AddContact extends AppCompatActivity{
         finish();
     }
 
+    // updating contact info
     public void UpdContact(int CiD) {
         DBHandler dbHandler = new DBHandler(this, null, null, 1);
         SQLiteDatabase db = dbHandler.getWritableDatabase();
@@ -208,8 +216,18 @@ public class AddContact extends AppCompatActivity{
         dbHandler.close();
     }
 
+    // deletes contact
     public void DeleteContact (View view) {
+        DBHandler dbHandler = new DBHandler(this, null, null, 1);
+        if (caller.equals("CList_Edit")) {
+            dbHandler.removeContact(purchase_identification_number, contactID);
+        } else {
+            dbHandler.deleteContact(contactID);
+            dbHandler.removeContact(purchase_identification_number, contactID);
+        }
+        dbHandler.close();
         Toast.makeText(this, "Deleted a contact", Toast.LENGTH_SHORT).show();
+        finish();
     }
 }
 

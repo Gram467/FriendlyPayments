@@ -26,7 +26,6 @@ public class History extends AppCompatActivity{
         aBar.setTitle(" History [" + DBHandler.purchases.length + "]");
 
         gridView = findViewById(R.id.gridview);
-
         Setup();
 
         if (getIntent().getStringExtra("del") != null && getIntent().getStringExtra("del").equals("Edit_Purchase_Delete")) {
@@ -45,9 +44,9 @@ public class History extends AppCompatActivity{
     public void Setup () {
         DBHandler db = new DBHandler(this, null, null, 1);
 
+        // fills view with created purchases
         db.getHistory();
         db.makePurchases();
-
         final PurchaseAdapter adapter = new PurchaseAdapter(this, DBHandler.purchases);
         gridView.setAdapter(adapter);
 
@@ -55,14 +54,12 @@ public class History extends AppCompatActivity{
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 PurchSupport purchase = DBHandler.purchases[position];
-
                 Intent Intent = new Intent(History.this, Purchase.class);
                 startActivity(Intent);
 
                 purchase_identification_number = DBHandler.pid[position];
             }
         });
-
         db.close();
 
     }

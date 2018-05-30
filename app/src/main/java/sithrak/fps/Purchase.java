@@ -43,6 +43,7 @@ public class Purchase extends AppCompatActivity {
         ShowItemz();
     }
 
+    // loads purchase description
     public void getDetails() {
         DBHandler db = new DBHandler(this, null, null, 1);
 
@@ -52,6 +53,7 @@ public class Purchase extends AppCompatActivity {
         db.close();
     }
 
+    // loads items and contacts that are added to the purchase
     public void ShowItemz() {
         GridView ItemGrid = findViewById(R.id.purchase_items);
         GridView ContactGrid = findViewById(R.id.grid_contacts);
@@ -88,6 +90,7 @@ public class Purchase extends AppCompatActivity {
         }
     }
 
+    // Add Contacts To ContactAdapter
     public void ACTA() {
         Contacts = DBHandler.CustID;
         ContactAdapter.rightContact = new int[1024];
@@ -109,17 +112,14 @@ public class Purchase extends AppCompatActivity {
         startActivity(Intent);
     }
 
-    public void DeleteMe(View view) {
-        DBHandler db = new DBHandler(this, null, null, 1);
-
-        db.DeleteP(History.purchase_identification_number);
-        db.close();
-
-        Toast.makeText(this,"Purchase deleted.",Toast.LENGTH_SHORT).show();
+    public void EditMe(View view) {
+        Intent goToEdit = new Intent (this, EditPurchase.class);
+        startActivity(goToEdit);
         finish();
     }
 
-    public void hide(TextView empty) {
+    // if there are no frames, hides the view
+    public static void hide(TextView empty) {
         empty.setVisibility(View.INVISIBLE);
     }
 }

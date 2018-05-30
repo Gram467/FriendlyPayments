@@ -8,8 +8,10 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import static sithrak.fps.ContactList.contactID;
 import static sithrak.fps.History.purchase_identification_number;
 import static sithrak.fps.NewPurchase.Contacts;
 import static sithrak.fps.NewPurchase.Items;
@@ -18,7 +20,9 @@ import static sithrak.fps.NewPurchase.PurchaseID;
 public class EditPurchase extends AppCompatActivity{
 
     GridView ItemGrid, ContactGrid;
+    TextView textView_items, textView_contacts;
     EditText Desc;
+
     public static int item_identification_number = 0;
 
     @Override
@@ -43,7 +47,10 @@ public class EditPurchase extends AppCompatActivity{
         UseAdapter();
     }
 
+    // loads purchase information
     public void GetStuff(int id) {
+        textView_items = findViewById(R.id.text_grid_items);
+        textView_contacts = findViewById(R.id.text_grid_contacts);
         ItemGrid = findViewById(R.id.grid_items);
         ContactGrid = findViewById(R.id.grid_contacts);
         DBHandler db = new DBHandler(this, null, null, 1);
@@ -68,7 +75,7 @@ public class EditPurchase extends AppCompatActivity{
     }
 
     //Add Items To Adapter
-    public static void AITA() {
+    public void AITA() {
         NewPurchase.Items = DBHandler.pid;
         ItemAdapter.correctitem = new int[1024];
 
@@ -76,11 +83,12 @@ public class EditPurchase extends AppCompatActivity{
             if (Items[i] != 0){
                 ItemAdapter.correctitem[i] = Items[i];
             } else if (Items[0] == 0){
-
+                Purchase.hide(textView_items);
             }
         }
     }
 
+    // Add Contacts To Adapter
     public void ACTA() {
         NewPurchase.Contacts = DBHandler.CustID;
         ContactAdapter.rightContact = new int[1024];
@@ -89,7 +97,7 @@ public class EditPurchase extends AppCompatActivity{
             if (Contacts[i] != 0) {
                 ContactAdapter.rightContact[i] = Contacts[i];
             } else if (Contacts[0] == 0) {
-//                hide(textView_contacts);
+                Purchase.hide(textView_contacts);
             }
         }
     }
@@ -106,6 +114,18 @@ public class EditPurchase extends AppCompatActivity{
                 item_identification_number = DBHandler.pid[position];
             }
         });
+
+        ContactGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                ContactSupport contact = DBHandler.contacts[position];
+                contactID = Contacts[position];
+
+                Intent cont = new Intent(EditPurchase.this, AddContact.class);
+                cont.putExtra("caller", "CList_Edit");
+                startActivity(cont);
+            }
+        });
     }
 
     public void AddItem(View view) {
@@ -120,6 +140,7 @@ public class EditPurchase extends AppCompatActivity{
         startActivity(NewContact);
     }
 
+    // updates just the description, because the rest is already updated
     public void UpdatePurchase(View view) {
         DBHandler db = new DBHandler(this, null, null, 1);
         String desc = Desc.getText().toString();
@@ -130,10 +151,11 @@ public class EditPurchase extends AppCompatActivity{
         finish();
     }
 
+    // deletes the purchase
     public void DeletePurchase(View view) {
         DBHandler db = new DBHandler(this, null, null, 1);
 
-        db.DeleteP(History.purchase_identification_number);
+        db.DeleteP(purchase_identification_number);
         db.close();
 
         Toast.makeText(this, "Purchase deleted", Toast.LENGTH_SHORT).show();
@@ -142,6 +164,6 @@ public class EditPurchase extends AppCompatActivity{
         BackToHistory.putExtra("del", "Edit_Purchase_Delete");
         startActivity(BackToHistory);
 
-//        finish();
+        finish();
     }
 }
