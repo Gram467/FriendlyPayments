@@ -1,11 +1,6 @@
 package sithrak.fps;
 
-/**
- * Created by Sithrak on 19.04.2018..
- */
-
 public class ItemSupport {
-
     // fields
     private int ItemID;
     private String IName;
@@ -16,14 +11,13 @@ public class ItemSupport {
     // constructorz
     public ItemSupport(){}
     public ItemSupport(String name, int quantity, String cat, float price){
-//        this.ItemID = id;
         this.IName = name;
         this.Price = price;
         this.Quantity = quantity;
         this.Category = cat;
     }
-    // properties
 
+    // properties
     public void setItemID(int id) { this.ItemID = id; }
     public int getItemID() { return this.ItemID; }
 

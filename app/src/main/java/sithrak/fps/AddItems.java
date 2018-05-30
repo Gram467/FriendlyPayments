@@ -16,10 +16,6 @@ import java.text.DecimalFormat;
 import static sithrak.fps.History.purchase_identification_number;
 import static sithrak.fps.NewPurchase.Items;
 
-/**
- * Created by Sithrak on 18.04.2018..
- */
-
 public class AddItems extends AppCompatActivity {
 
     private EditText namae, quantity, price;
@@ -51,7 +47,6 @@ public class AddItems extends AppCompatActivity {
             caller = getIntent().getStringExtra("caller");
         }
 
-
         // fill dropdown with category choices
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, items);
         dropdown.setAdapter(adapter);
@@ -60,45 +55,34 @@ public class AddItems extends AppCompatActivity {
     public void addItem(View view) {
 
         DBHandler dbItem = new DBHandler(this, null, null, 1);
-        String name = namae.getText().toString();
         float val;
         int count;
 
+        String name = namae.getText().toString();
         // get field values
         DecimalFormat dec = new DecimalFormat("#.##");
-        if (price.getText().toString().equals("")) {
-            val = 0;
-        } else {
-            val = Float.parseFloat(
-                    (price.getText().toString())
-                            .replaceAll(",", ".")                                   // convert incoming comma's to dots for float type
-                            .replaceAll("k", "000"));                              // turns each k to a thousand (000)
+        if (price.getText().toString().equals("")) { val = 0; }
+            else {
+                val = Float.parseFloat((price.getText().toString())
+                        .replaceAll(",", ".") // convert incoming comma's to dots for float type
+                        .replaceAll("k", "000")); // turns each k to a thousand (000)
         }
-            float value = Float.valueOf(dec.format(val));                                                    // sets 2 numbers after the dot.. example - 123.97
-        if (quantity.getText().toString().equals("")) {
-            count = 0;
-        } else {
-            count =
-                    Integer.parseInt(
-                            (quantity.getText().toString())
-                                    .replaceAll("k", "000")                                  // turns each k to a thousand (000)
-                                    .replaceAll("[\\D]", ""));                              // removes every other symbol that is not 0..9
+        float value = Float.valueOf(dec.format(val)); // sets 2 numbers after the dot.. example - 123.97
+        if (quantity.getText().toString().equals("")) { count = 0; }
+            else {
+                count = Integer.parseInt((quantity.getText().toString())
+                        .replaceAll("k", "000") // turns each k to a thousand (000)
+                        .replaceAll("[\\D]", "")); // removes every other symbol that is not 0..9
         }
-        String type = String.valueOf(dropdown.getSelectedItem());                                         // switched to a dropdown, for easier control of categories
-
+        String type = String.valueOf(dropdown.getSelectedItem()); // switched to a dropdown, for easier control of categories
 
         // create table line for Item
         ItemSupport item = new ItemSupport(name, count, type, value);
         dbItem.addItem(item);
 
-        // clear input fields
-        namae.setText("");
-        price.setText("");
-        quantity.setText("");
-
         // Selection of a specific item
         // Needed to assign several items to the same purchase id from one add item view
-            // (not necessarily needed, but don't really have the leisure to fix it right now)
+        // (not necessarily needed, but don't really have the leisure to fix it right now)
         SQLiteDatabase db = dbItem.getReadableDatabase();
         String result = "";
         int id = 0;
@@ -127,14 +111,14 @@ public class AddItems extends AppCompatActivity {
         finish();
     }
 
-    public void AITH() {
+    private void AITH() {
 
         DBHandler dbHelp = new DBHandler(this, null, null, 1);
         ItemAdapter.correctitem = new int[1024];
 
         for (int i = 0; i < Items.length; i++) {
             if (Items[i] != 0){
-                HelperTable help = new HelperTable(purchase_identification_number, Items[i]);
+                HelperTable help = new HelperTable(purchase_identification_number, Items[i], 0);
                 dbHelp.addToHelper(help);
                 ItemAdapter.correctitem[i] = Items[i];
             }

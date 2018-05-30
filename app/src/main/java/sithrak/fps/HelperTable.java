@@ -1,9 +1,5 @@
 package sithrak.fps;
 
-/**
- * Created by Sithrak on 26.04.2018..
- */
-
 public class HelperTable {
 
     //fields
@@ -12,16 +8,14 @@ public class HelperTable {
     private int ContactID;
 
     // constructor
-
     public HelperTable(){}
-    public HelperTable(int id, int itemID){
+    public HelperTable(int id, int itemID, int contID){
         this.PurchaseID = id;
         this.ItemID = itemID;
-//        this.ContactID = contID;
+        this.ContactID = contID;
     }
 
     // properties
-
     public void setItemID(int id) { this.ItemID = id; }
     public int getItemID() { return this.ItemID; }
 

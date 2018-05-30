@@ -11,12 +11,13 @@ import android.widget.GridView;
 import android.widget.Toast;
 
 import static sithrak.fps.History.purchase_identification_number;
+import static sithrak.fps.NewPurchase.Contacts;
 import static sithrak.fps.NewPurchase.Items;
 import static sithrak.fps.NewPurchase.PurchaseID;
 
 public class EditPurchase extends AppCompatActivity{
 
-    GridView ItemGrid;
+    GridView ItemGrid, ContactGrid;
     EditText Desc;
     public static int item_identification_number = 0;
 
@@ -44,14 +45,20 @@ public class EditPurchase extends AppCompatActivity{
 
     public void GetStuff(int id) {
         ItemGrid = findViewById(R.id.grid_items);
+        ContactGrid = findViewById(R.id.grid_contacts);
         DBHandler db = new DBHandler(this, null, null, 1);
 
         db.loadItemsForPurchase(purchase_identification_number);
         AITA();
         db.makeItems();
+        final ItemAdapter i_adapter = new ItemAdapter(this, DBHandler.items);
+        ItemGrid.setAdapter(i_adapter);
 
-        final ItemAdapter adapter = new ItemAdapter(this, DBHandler.items);
-        ItemGrid.setAdapter(adapter);
+        db.loadContactsForPurchase(purchase_identification_number);
+        ACTA();
+        db.makeContacts();
+        final ContactAdapter c_adapter = new ContactAdapter(this, DBHandler.contacts);
+        ContactGrid.setAdapter(c_adapter);
 
         Desc = findViewById(R.id.description);
         Desc.setText(db.getDesc(id));
@@ -74,6 +81,19 @@ public class EditPurchase extends AppCompatActivity{
         }
     }
 
+    public void ACTA() {
+        NewPurchase.Contacts = DBHandler.CustID;
+        ContactAdapter.rightContact = new int[1024];
+
+        for (int i = 0; i < Contacts.length; i++) {
+            if (Contacts[i] != 0) {
+                ContactAdapter.rightContact[i] = Contacts[i];
+            } else if (Contacts[0] == 0) {
+//                hide(textView_contacts);
+            }
+        }
+    }
+
     public void UseAdapter() {
         ItemGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -92,7 +112,12 @@ public class EditPurchase extends AppCompatActivity{
         Intent NewItem = new Intent(this, AddItems.class);
         NewItem.putExtra("caller", "EditPurchase");
         startActivity(NewItem);
+    }
 
+    public void AddContact(View view) {
+        Intent NewContact = new Intent(this, AddContact.class);
+        NewContact.putExtra("caller", "EditPurchase");
+        startActivity(NewContact);
     }
 
     public void UpdatePurchase(View view) {
@@ -114,6 +139,7 @@ public class EditPurchase extends AppCompatActivity{
         Toast.makeText(this, "Purchase deleted", Toast.LENGTH_SHORT).show();
 
         Intent BackToHistory = new Intent(this, History.class);
+        BackToHistory.putExtra("del", "Edit_Purchase_Delete");
         startActivity(BackToHistory);
 
 //        finish();

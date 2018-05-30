@@ -1,11 +1,6 @@
 package sithrak.fps;
 
-/**
- * Created by Sithrak on 19.04.2018..
- */
-
 public class PurchSupport {
-
     //fields
     private int PurchaseID;
     private String Description;

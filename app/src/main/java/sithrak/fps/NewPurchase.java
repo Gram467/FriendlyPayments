@@ -12,23 +12,16 @@ import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-/**
- * Created by Sithrak on 22.01.2018..
- */
+public class NewPurchase extends AppCompatActivity {
 
-public class NewPurchase extends AppCompatActivity{
-
-    GridView ItemGrid;
-    TextView list;
+    GridView ItemGrid, ContactGrid;
     EditText Description;
     public static int[] Items;// = new int[1024];
-    public static int[] Contacts = new int[1024];
+    public static int[] Contacts;// = new int[1024];
     public static int PurchaseID;
     public static int aNumberForUpdate;
-
     int purchase = 0;
     String description = "";
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +34,7 @@ public class NewPurchase extends AppCompatActivity{
         aBar.setTitle(" New Purchase");
 
         ItemGrid = findViewById(R.id.grid_items);
+        ContactGrid = findViewById(R.id.grid_contacts);
         Description = findViewById(R.id.description);
 
         CreatePurchase();
@@ -53,45 +47,57 @@ public class NewPurchase extends AppCompatActivity{
     }
 
     // to call the function via button from xml
-    public void ShowItems(View view) {
-        ShowItemz();
-    }
+    public void ShowItems(View view) { ShowItemz(); }
 
     public void ShowItemz() {
 
-        AITH();     //all good in here
+        ATH();     //all good in here
         DBHandler db = new DBHandler(this, null, null, 1);
 
         db.loadItemsForPurchase(PurchaseID);
         db.makeItems();
 
-        final ItemAdapter adapter = new ItemAdapter(this, DBHandler.items);
-        ItemGrid.setAdapter(adapter);
+        final ItemAdapter i_adapter = new ItemAdapter(this, DBHandler.items);
+        ItemGrid.setAdapter(i_adapter);
+
+        db.loadContactsForPurchase(PurchaseID);
+        db.makeContacts();
+
+        final ContactAdapter c_adapter = new ContactAdapter(this, DBHandler.contacts);
+        ContactGrid.setAdapter(c_adapter);
 
         db.close();
     }
 
-    // Add Item To Helper (Table)
-    public void AITH() {
-
+    // Add To Helper (Table)
+    private void ATH() {
         DBHandler dbHelp = new DBHandler(this, null, null, 1);
         ItemAdapter.correctitem = new int[1024];
+        ContactAdapter.rightContact = new int[1024];
 
+        // Add created items
         for (int i = 0; i < Items.length; i++) {
             if (Items[i] != 0){
-                HelperTable help = new HelperTable(PurchaseID, Items[i]);
+                HelperTable help = new HelperTable(PurchaseID, Items[i], 0);
                 dbHelp.addToHelper(help);
                 ItemAdapter.correctitem[i] = Items[i];
             }
         }
 
+        // Add assigned / created contacts
+        for (int i = 0; i < Contacts.length; i++) {
+            if (Contacts[i] != 0) {
+                HelperTable help = new HelperTable(PurchaseID, 0, Contacts[i]);
+                dbHelp.addToHelper(help);
+                ContactAdapter.rightContact[i] = Contacts[i];
+            }
+        }
         dbHelp.close();
     }
 
     // Creates Purchase so that other objects might be assigned to its ID
     public void CreatePurchase() {
         DBHandler dbPurch = new DBHandler(this, null, null, 1);
-
         String desc = Description.getText().toString();
 
         PurchSupport cart = new PurchSupport(desc);
@@ -120,19 +126,9 @@ public class NewPurchase extends AppCompatActivity{
         startActivity(Intent);
     }
 
-    //
-    public void AddContactToHelper() {
-        DBHandler dbHelp = new DBHandler(this, null, null, 1);
-        for (int i = 0; i < Contacts.length; i++) {
-            if (Contacts[i] != 0) {
-                HelperTable help = new HelperTable(PurchaseID, Contacts[i]);
-                dbHelp.addToHelper(help);
-            }
-        }
-    }
+
 
     public void UpdatePurchase(View view) {
-
         aNumberForUpdate++;
         PurchCheck();
         Toast.makeText(this,"The Purchase has been saved.",Toast.LENGTH_SHORT).show();
@@ -156,7 +152,6 @@ public class NewPurchase extends AppCompatActivity{
 
     @Override
     public void onBackPressed() {
-
         int count = getFragmentManager().getBackStackEntryCount();
 
         if (count == 0) {
@@ -165,7 +160,6 @@ public class NewPurchase extends AppCompatActivity{
         } else {
             getFragmentManager().popBackStack();
         }
-
     }
 
     public void UpdPurch() {
@@ -187,6 +181,11 @@ public class NewPurchase extends AppCompatActivity{
 
         dbz.close();
         db.close();
+    }
+
+    public void AddContact(View view){
+        Intent contact = new Intent(this, AddContact.class);
+        startActivity(contact);
     }
 
 }

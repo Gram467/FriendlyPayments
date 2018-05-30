@@ -5,12 +5,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.widget.Toast;
 
 import java.text.DecimalFormat;
 
-/**
- * Created by Sithrak on 18.04.2018..
- */
+import static sithrak.fps.ContactList.contactsArray;
 
 public class DBHandler extends SQLiteOpenHelper {
 
@@ -29,6 +28,7 @@ public class DBHandler extends SQLiteOpenHelper {
     public static final String CON_EMAIL = "Email"; // Not thinking of implementing, yet
     public static final String CON_BNAME = "BankName"; //For User Details
     public static final String CON_BNUM = "BankAccountNumber";
+    public static final String CON_PASS = "Password";
 
     public static final String COL_ITEMID = "ItemID";
     public static final String ITEM_TABLE = "Items";
@@ -40,12 +40,15 @@ public class DBHandler extends SQLiteOpenHelper {
     public static final String H_TABLE = "HelperTable";
 
     // a workaround to create frames for History
-    public static int unknown;
+    private static int unknown; // used for calculating amount of purchases and items
+    private static int contactsInPurchase;
 //    public static Integer pnum;
     public static PurchSupport[] purchases = new PurchSupport[unknown];
     public static ItemSupport[] items = new ItemSupport[unknown];
+    public static ContactSupport[] contacts = new ContactSupport[contactsInPurchase];
     public static String PurchDesc;
-    public static int pid[] = new int[1024];
+    public static int pid[] = new int[1024]; // product(item) id
+    public static int CustID[] = new int[1024]; // customer id
 
     // a one of a kind description to make sure that the correct purchase has been selected encoded in base64
     public static String impossible = "V2h5IHdvdWxkIGFueW9uZSBldmVyIG1ha2UgYSBkZXNjcmlwdGlvbiBzdWNoIGFzIHRoaXMhPw=="; // Why would anyone ever make a description such as this!?
@@ -58,20 +61,32 @@ public class DBHandler extends SQLiteOpenHelper {
     //Create tables
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("DROP TABLE IF EXISTS " + CON_TABLE);
-        String CREATE_USER_TABLE = "CREATE TABLE " + CON_TABLE + "(" +
+        Tables(db);
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int i, int i1) {
+    }
+
+    public static void Tables(SQLiteDatabase db) {
+//        db.execSQL("DROP TABLE " + CON_TABLE);            //for table updating purposes
+//        db.execSQL("DROP TABLE " + ITEM_TABLE);
+//        db.execSQL("DROP TABLE " + PURC_TABLE);
+//        db.execSQL("DROP TABLE " + H_TABLE);
+
+        String CREATE_USER_TABLE = "CREATE TABLE IF NOT EXISTS " + CON_TABLE + "(" +
                 COL_CONTID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 CON_FNAME + " TEXT, " +
                 CON_LNAME + " TEXT, " +
                 CON_NUM + " INTEGER, " +
                 CON_EMAIL + " TEXT, " +
                 CON_BNAME + " TEXT, " +
-                CON_BNUM + " TEXT" + ")";
+                CON_BNUM + " TEXT, " +
+                CON_PASS + " TEXT" + ")";
         db.execSQL(CREATE_USER_TABLE);
 
 
-        db.execSQL("DROP TABLE IF EXISTS " + ITEM_TABLE);
-        String CREATE_I_TABLE = "CREATE TABLE " + ITEM_TABLE + "(" +
+        String CREATE_I_TABLE = "CREATE TABLE IF NOT EXISTS " + ITEM_TABLE + "(" +
                 COL_ITEMID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 ITEM_NAME + " TEXT, " +
                 ITEM_PRICE + " FLOAT, " +
@@ -80,32 +95,26 @@ public class DBHandler extends SQLiteOpenHelper {
         db.execSQL(CREATE_I_TABLE);
 
 
-        db.execSQL("DROP TABLE IF EXISTS " + PURC_TABLE);
-        String CREATE_MAIN_TABLE = "CREATE TABLE " + PURC_TABLE + "(" +
+        String CREATE_MAIN_TABLE = "CREATE TABLE IF NOT EXISTS " + PURC_TABLE + "(" +
                 COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COL_DESC + " TEXT " +  ")";
         db.execSQL(CREATE_MAIN_TABLE);
 
 
-        db.execSQL("DROP TABLE IF EXISTS " + H_TABLE);
-        String CREATE_H_TABLE = "CREATE TABLE " + H_TABLE + "(" +
+        String CREATE_H_TABLE = "CREATE TABLE IF NOT EXISTS " + H_TABLE + "(" +
                 COL_ITEMID + " INTEGER, " +
                 COL_ID + " INTEGER, " +
-//                COL_CONTID + " INTEGER, " +
-                "PRIMARY KEY( " + COL_ITEMID + ", " /*+ COL_CONTID + ", " */ + COL_ID + ")" + ")";
+                COL_CONTID + " INTEGER, " +
+                "PRIMARY KEY( " + COL_ITEMID + ", " + COL_CONTID + ", "  + COL_ID + ")" + ")";
         db.execSQL(CREATE_H_TABLE);
+
+        String sql = "INSERT OR REPLACE INTO " + CON_TABLE + " (" + COL_CONTID + ", " + CON_FNAME + ", " + CON_LNAME + ", " + CON_NUM + ", " + CON_EMAIL + ", " + CON_BNAME + ", " + CON_BNUM + ", " + CON_PASS + ") VALUES " +
+                "('1','', '', '', '', '', '', '')";
+//        db.execSQL(sql);
     }
-
-    @Override
-    public void onUpgrade(SQLiteDatabase db, int i, int i1) {
-    }
-
-
-
 
     public void loadItemsForPurchase(int PiD) {
-
-        String PItems = "Select * From " + H_TABLE + " WHERE " + COL_ID + " = '" + PiD + "'";
+        String PItems = "Select * From " + H_TABLE + " WHERE " + COL_ID + " = '" + PiD + "' AND " + COL_ITEMID + " != 0";
 
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(PItems, null);
@@ -125,7 +134,6 @@ public class DBHandler extends SQLiteOpenHelper {
     }
 
     public String loadItemName(int itemid) {
-
         String ItemIDs = "Select * FROM " + ITEM_TABLE + " WHERE " + COL_ITEMID + " = '" + itemid + "'";
         String name = "";
 
@@ -143,7 +151,6 @@ public class DBHandler extends SQLiteOpenHelper {
     }
 
     public float loadItemPrice(int itemid) {
-
         String ItemIDs = "Select * FROM " + ITEM_TABLE + " WHERE " + COL_ITEMID + " = '" + itemid + "'";
         float price = 0;
 
@@ -161,7 +168,6 @@ public class DBHandler extends SQLiteOpenHelper {
     }
 
     public int loadItemQuantity(int itemid) {
-
         String ItemIDs = "Select * FROM " + ITEM_TABLE + " WHERE " + COL_ITEMID + " = '" + itemid + "'";
         int quantity = 0;
 
@@ -179,7 +185,6 @@ public class DBHandler extends SQLiteOpenHelper {
     }
 
     public String loadItemCat(int itemid) {
-
         String ItemIDs = "Select * FROM " + ITEM_TABLE + " WHERE " + COL_ITEMID + " = '" + itemid + "'";
         String val = "";
 
@@ -196,14 +201,181 @@ public class DBHandler extends SQLiteOpenHelper {
         return val;
     }
 
+    public void loadAllContacts() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String Query = "Select * From " + CON_TABLE;
+        int num = 0;
+        contactsInPurchase = 0; // re-used for Adapter purposes
+        Cursor cursor = db.rawQuery(Query, null);
+
+        while (cursor.moveToNext()) {
+            CustID[num] = cursor.getInt(0);
+            contactsInPurchase++;
+            num++;
+        }
+        cursor.close();
+        db.close();
+    }
+
+    public void loadContactsForPurchase(int PiD) {
+        String Contacts = "Select * From " + H_TABLE + " WHERE " + COL_ID + " = '" + PiD + "' AND " + COL_CONTID + " != 0";
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(Contacts, null);
+        contactsInPurchase = 0;
+        CustID = new int[1024];
+        int num = 0;
+
+        while (cursor.moveToNext()) {
+            CustID[num] = cursor.getInt(2);
+            contactsInPurchase++;
+            num++;
+        }
+        cursor.close();
+        db.close();
+    }
+
+    public String loadContactName(int contactID) {
+        String ContactIDs = "Select * From " + CON_TABLE + " WHERE " + COL_CONTID + " = '" + contactID + "'";
+        String val = "";
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(ContactIDs, null);
+
+        while (cursor.moveToNext()) {
+            val = cursor.getString(1);
+        }
+
+        cursor.close();
+        db.close();
+        return val;
+    }
+
+    public String loadContactSurname(int contactID) {
+        String ContactIDs = "Select * From " + CON_TABLE + " WHERE " + COL_CONTID + " = '" + contactID + "'";
+        String val = "";
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(ContactIDs, null);
+
+        while (cursor.moveToNext()) {
+            val = cursor.getString(2);
+        }
+
+        cursor.close();
+        db.close();
+        return val;
+    }
+
+    public String loadContactNumber(int contactID) {
+        String ContactIDs = "Select * From " + CON_TABLE + " WHERE " + COL_CONTID + " = '" + contactID + "'";
+        String val = "";
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(ContactIDs, null);
+
+        while (cursor.moveToNext()) {
+            val = cursor.getString(3);
+        }
+
+        cursor.close();
+        db.close();
+        return val;
+    }
+
+    public String loadContactEmail(int contactID) {
+        String ContactIDs = "Select * From " + CON_TABLE + " WHERE " + COL_CONTID + " = '" + contactID + "'";
+        String val = "";
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(ContactIDs, null);
+
+        while (cursor.moveToNext()) {
+            val = cursor.getString(4);
+        }
+
+        cursor.close();
+        db.close();
+        return val;
+    }
+
+    public String loadUserBN(int contactID) {
+        String ContactIDs = "Select * From " + CON_TABLE + " WHERE " + COL_CONTID + " = '" + contactID + "'";
+        String val = "";
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(ContactIDs, null);
+
+        while (cursor.moveToNext()) {
+            val = cursor.getString(5);
+        }
+
+        cursor.close();
+        db.close();
+        return val;
+    }
+
+    public String loadUserBAN(int contactID) {
+        String ContactIDs = "Select * From " + CON_TABLE + " WHERE " + COL_CONTID + " = '" + contactID + "'";
+        String val = "";
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(ContactIDs, null);
+
+        while (cursor.moveToNext()) {
+            val = cursor.getString(6);
+        }
+
+        cursor.close();
+        db.close();
+        return val;
+    }
+
+    public String loadUserPass(int contactID) {
+        String ContactIDs = "Select * From " + CON_TABLE + " WHERE " + COL_CONTID + " = '" + contactID + "'";
+        String val = "";
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(ContactIDs, null);
+
+        while (cursor.moveToNext()) {
+            val = cursor.getString(7);
+        }
+
+        cursor.close();
+        db.close();
+        return val;
+    }
+
+
+    //could be made with mixing other functions
+    public void loadContactInfo() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String Query = "Select * From " + CON_TABLE;
+        contactsArray = new String[contactsInPurchase - 1];
+        int num = 0;
+        Cursor cursor = db.rawQuery(Query, null);
+
+        while (cursor.moveToNext()) {
+            if (num == 0) {/*Do Nothing, ID for user*/
+            num++;}
+            else {
+                contactsArray[num - 1] = cursor.getString(1) + ", " + cursor.getString(2);
+                num++;
+            }
+        }
+
+        cursor.close();
+        db.close();
+    }
+
+
 
     // Adds itemID and ContactID for current purchase (CRUD - Create [HelperTable])
     public void addToHelper(HelperTable help) {
-
         ContentValues values = new ContentValues();
             values.put(COL_ID, help.getPurchaseID());
             values.put(COL_ITEMID, help.getItemID());
-//        values.put(COL_CONTID, help.getContactID());
+            values.put(COL_CONTID, help.getContactID());
 
         SQLiteDatabase db = this.getWritableDatabase();
         db.insert(H_TABLE, null, values);
@@ -213,7 +385,6 @@ public class DBHandler extends SQLiteOpenHelper {
 
     // Adds item details to item table (CRUD - Create [ItemsTable])
     public void addItem(ItemSupport item) {
-
         ContentValues values = new ContentValues();
             values.put(ITEM_NAME, item.getIName());
             values.put(ITEM_PRICE, item.getPrice());
@@ -226,27 +397,26 @@ public class DBHandler extends SQLiteOpenHelper {
         db.close();
     }
 
-    // Adds contact details to contact table (CRUD - Create [ContactsTable])
     public void addContact(ContactSupport contact) {
-
-        ContentValues values = new ContentValues();
-            values.put(CON_FNAME, contact.getCName());
-            values.put(CON_LNAME, contact.getCSurname());
-            values.put(CON_NUM, contact.getNumber());
-            values.put(CON_EMAIL, contact.getEmail());
-            values.put(CON_BNAME, contact.getBName());
-            values.put(CON_BNUM, contact.getBNum());
+        ContentValues val = new ContentValues();
+            val.put(CON_FNAME, contact.getCName());
+            val.put(CON_LNAME, contact.getCSurname());
+            val.put(CON_NUM, contact.getNumber());
+            val.put(CON_EMAIL, contact.getEmail());
+            val.put(CON_BNAME, contact.getBName());
+            val.put(CON_BNUM, contact.getBNum());
+            val.put(CON_PASS, contact.getPassword());
 
         SQLiteDatabase db = this.getWritableDatabase();
-        db.insert(CON_TABLE, null, values);
+        db.insert(CON_TABLE, null, val);
 
         db.close();
     }
 
     // Creates the purchase at the launch of the view so that there's a PurchaseID to which to assign the rest of the objects
     public void addPurchase(PurchSupport cart) {
-
         NewPurchase.Items = new int[1024];
+        NewPurchase.Contacts = new int[1024];
         NewPurchase.aNumberForUpdate = 1;
         AddItems.PurchaseItemPosition = 0;
 
@@ -261,7 +431,6 @@ public class DBHandler extends SQLiteOpenHelper {
 
     // gets amount of purchases created for frame count in History
     public void getHistory() {
-
         SQLiteDatabase db = this.getReadableDatabase();
         String Query = "SELECT * FROM " + PURC_TABLE;
         int pnum = 0;
@@ -274,6 +443,8 @@ public class DBHandler extends SQLiteOpenHelper {
             unknown++;
             pnum++;
         }
+        cursor.close();
+        db.close();
     }
 
     //gets specific purchase
@@ -285,13 +456,14 @@ public class DBHandler extends SQLiteOpenHelper {
         while (cursor.moveToNext()) {
             PurchDesc = cursor.getString(1);
         }
+        cursor.close();
+        db.close();
         return PurchDesc;
     }
 
 
     // getting description for each frame in History
     public String getPurchDesc(int num) {
-
         SQLiteDatabase db = this.getReadableDatabase();
         String Query = "Select * FROM " + PURC_TABLE + " WHERE " + COL_ID + " = '" + pid[num] + "'";
         Cursor cursor = db.rawQuery(Query, null);
@@ -299,12 +471,13 @@ public class DBHandler extends SQLiteOpenHelper {
         while (cursor.moveToNext()){
             PurchDesc = cursor.getString(1);
         }
+        cursor.close();
+        db.close();
         return PurchDesc;
     }
 
     // creates a new frame for each purchase in History
     public PurchSupport[] makePurchases() {
-
         purchases = new PurchSupport[unknown];
         for (int i = 0; i < unknown; i++){
             purchases[i] = new PurchSupport();
@@ -314,7 +487,6 @@ public class DBHandler extends SQLiteOpenHelper {
     }
 
     public ItemSupport[] makeItems() {
-
         items = new ItemSupport[unknown];
         for (int i = 0; i < unknown; i++) {
             items[i] = new ItemSupport();
@@ -322,11 +494,18 @@ public class DBHandler extends SQLiteOpenHelper {
         return items;
     }
 
+    public ContactSupport[] makeContacts() {
+        contacts = new ContactSupport[contactsInPurchase];
+        for (int i = 0; i < contactsInPurchase; i++) {
+            contacts[i] = new ContactSupport();
+        }
+        return contacts;
+    }
+
     public void updatePurchase (int ID, String desc) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues value = new ContentValues();
-//        value.put(COL_ID, ID);
         value.put(COL_DESC, desc);
         db.update(PURC_TABLE, value, COL_ID + " = " + ID, null);
 
@@ -346,12 +525,26 @@ public class DBHandler extends SQLiteOpenHelper {
         db.close();
     }
 
+    public void updateContact (int ID, String name, String surname, int num, String email, String bn, String ban, String pass) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues val = new ContentValues();
+            val.put(CON_FNAME, name);
+            val.put(CON_LNAME, surname);
+            val.put(CON_NUM, num);
+            val.put(CON_EMAIL, email);
+            val.put(CON_BNAME, bn);
+            val.put(CON_BNUM, ban);
+            val.put(CON_PASS, pass);
+
+        db.update(CON_TABLE, val, COL_CONTID + " = " + ID, null);
+        db.close();
+    }
+
     public void DeleteP(int PiD) {
 
-        // get items of current purchase
-        loadItemsForPurchase(PiD);
+        loadItemsForPurchase(PiD); // get items of current purchase
         deletePurchase(PiD);
-
         deletePurchaseFromHelper(PiD);
 
         for (int i = 0; i < pid.length; i++) {

@@ -10,10 +10,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
-/**
- * Created by Sithrak on 30.04.2018..
- */
-
 public class History extends AppCompatActivity{
     GridView gridView;
     public static int purchase_identification_number = 0;
@@ -32,17 +28,21 @@ public class History extends AppCompatActivity{
         gridView = findViewById(R.id.gridview);
 
         Setup();
+
+        if (getIntent().getStringExtra("del") != null && getIntent().getStringExtra("del").equals("Edit_Purchase_Delete")) {
+            onBackPressed();
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         aBar.setTitle(" History [" + DBHandler.purchases.length + "]");
+
         Setup();
     }
 
     public void Setup () {
-
         DBHandler db = new DBHandler(this, null, null, 1);
 
         db.getHistory();
@@ -64,7 +64,6 @@ public class History extends AppCompatActivity{
         });
 
         db.close();
+
     }
 }
-
-

@@ -48,7 +48,7 @@ public class Preview extends AppCompatActivity {
         ActionBar aBar = getSupportActionBar();
         aBar.setDisplayShowHomeEnabled(true);
         aBar.setIcon(R.drawable.ic_noun_1352054_cc);
-        aBar.setTitle(" Purchase #" + ( History.purchase_identification_number ));
+        aBar.setTitle(" Purchase #" + (History.purchase_identification_number));
 
         Msg = findViewById(R.id.Message);
         Desc = findViewById(R.id.description);
@@ -63,6 +63,7 @@ public class Preview extends AppCompatActivity {
         super.onResume();
         Message();
         Msg.setText(idea);
+        Desc.setText(desc);
     }
 
     public void Message() {
@@ -99,28 +100,30 @@ public class Preview extends AppCompatActivity {
         db.close();
     }
 
-
+    // allows the function to be called via press of a button
     public void Copee(View view) {
         Copies();
-    }
-
-    public void Copies() {
-
-        DBHandler db = new DBHandler(this, null, null, 1);
-        msgToCopy = db.getDesc(History.purchase_identification_number) + idea;
-        db.close();
 
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         ClipData clip = ClipData.newPlainText("", msgToCopy);
         clipboard.setPrimaryClip(clip);
     }
 
+    // Retrieves message text
+    public void Copies() {
+        DBHandler db = new DBHandler(this, null, null, 1);
+        msgToCopy = db.getDesc(History.purchase_identification_number) + idea;
+        db.close();
+    }
+
+    // allows the function to be called via press of a button
     public void Ex(View view) {
         verifyStoragePermissions(this);
         Export();
     }
 
-    public void Export(){
+    // Logic for CSV export
+    public void Export() {
         DBHandler db = new DBHandler(this, null, null, 1);
 
         String Columns = "\"Item\", \"Price\", \"Quantity\", \"Category\", \"Description\"";
@@ -133,46 +136,43 @@ public class Preview extends AppCompatActivity {
                         + "\", \"" + fixedFloat
                         + "\", \"" + db.loadItemQuantity(correctitem[i])
                         + "\", \"" + db.loadItemCat(correctitem[i])
-                        + "\", \""// + db.getDesc(correctitem[i])
+                        + "\", \"" // + db.getDesc(correctitem[i]) - don't need the description in every line
                         + System.getProperty("line.separator");
             }
         }
 
+        String EndRes = Data + "\"\",\"\",\"\",\"\",\"" + db.getDesc(purchase_identification_number) + "\"";
+        db.close();
 
-        String X = Data + "\"\",\"\",\"\",\"\",\"" + db.getDesc(purchase_identification_number) + "\"";
         File file = null;
-
-        File dir = new File (Environment.getExternalStorageDirectory().getAbsolutePath() + "/FP_Exports");
-
+        File dir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/FP_Exports");
         if (!dir.exists()) {
             dir.mkdir();
         }
 
         String ExportName = "Purchase_" + purchase_identification_number + ".csv";
-
         file = new File(dir, ExportName);
         try {
             file.createNewFile();
         } catch (IOException e) {
-            }
-            FileOutputStream out = null;
+        }
+        FileOutputStream out = null;
         try {
             out = new FileOutputStream(file);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-        } try {
-            out.write(X.getBytes());
+        }
+        try {
+            out.write(EndRes.getBytes()); // writes the string into the .csv file
         } catch (IOException e) {
             e.printStackTrace();
-        } try {
+        }
+        try {
             out.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        Uri u1  =   null;
-        u1  =   Uri.fromFile(file);
-
+        Uri u1 = Uri.fromFile(file);
         Sharing(u1);
     }
 
@@ -190,7 +190,6 @@ public class Preview extends AppCompatActivity {
         }
     }
 
-
     public void EditPress(View view) {
         Intent Intent = new Intent(this, EditPurchase.class);
         startActivity(Intent);
@@ -204,7 +203,7 @@ public class Preview extends AppCompatActivity {
         startActivity(sendIntent);
     }
 
-    public void Send (View view) {
+    public void Send(View view) {
         Copies();
         SharingText(msgToCopy);
     }
@@ -215,5 +214,4 @@ public class Preview extends AppCompatActivity {
         send.setType("text/html");
         startActivity(send);
     }
-
 }

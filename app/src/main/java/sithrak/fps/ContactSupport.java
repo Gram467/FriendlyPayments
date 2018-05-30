@@ -1,13 +1,7 @@
 package sithrak.fps;
 
-/**
- * Created by Sithrak on 19.04.2018..
- */
-
 public class ContactSupport {
-
     // fields
-
     private int ContactID;
     private String CName;
     private String CSurname;
@@ -15,22 +9,21 @@ public class ContactSupport {
     private String Email;
     private String BName;
     private String BNum;
-
+    private String Password;
 
     // construct
     public ContactSupport(){}
-    public ContactSupport(String name, String surname, int num, String email, String bank_name, String bank_num){
-//        this.ContactID = id;
+    public ContactSupport(String name, String surname, int num, String email, String bank_name, String bank_num, String pass){
         this.CName = name;
         this.CSurname = surname;
         this.Number = num;
         this.Email = email;
         this.BName = bank_name;
         this.BNum = bank_num;
+        this.Password = pass;
     }
 
     // properties
-
     public void setContactID(int cid) { this.ContactID = cid; }
     public int getContactID() { return this.ContactID; }
 
@@ -52,5 +45,6 @@ public class ContactSupport {
     public void setBNum(String bNum) { this.BNum = bNum; }
     public String getBNum() { return this.BNum; }
 
-
+    public void setPassword(String password) { this.Password = password; }
+    public String getPassword() { return this.Password; }
 }
