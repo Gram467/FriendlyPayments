@@ -50,6 +50,14 @@
         <activity android:name=".EditItem"
             android:parentActivityName=".EditPurchase"
             android:screenOrientation="portrait"/>
+
+        <activity android:name=".AddContact"
+            android:parentActivityName=".NewPurchase"
+            android:screenOrientation="portrait"/>
+
+        <activity android:name=".ContactList"
+            android:parentActivityName=".NewPurchase"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>
