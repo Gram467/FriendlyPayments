@@ -31,6 +31,7 @@
         android:onClick="AddItemz"
         android:text="Add item"
         android:textAllCaps="false"
+        app:layout_constraintBottom_toTopOf="@+id/guideline1"
         app:layout_constraintEnd_toStartOf="@+id/btn_contact"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
@@ -45,8 +46,10 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:fontFamily="casual"
+        android:onClick="AddContact"
         android:text="Add Contact"
         android:textAllCaps="false"
+        app:layout_constraintBottom_toTopOf="@+id/guideline1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/btn_item"
@@ -56,8 +59,9 @@
         android:id="@+id/scroll"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/btn_item">
+        android:background="@drawable/scroll_bg"
+        app:layout_constraintTop_toBottomOf="@+id/guideline1"
+        app:layout_constraintBottom_toTopOf="@+id/guideline2">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -80,7 +84,7 @@
             <GridView
                 android:id="@+id/grid_items"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="150dp"
 
                 android:columnWidth="100dp"
                 android:gravity="center"
@@ -98,38 +102,38 @@
 
             <!--Commented, because the logic for managing contacts hasn't been created yet-->
 
-            <!--<TextView-->
-                <!--android:id="@+id/text_grid_contacts"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:fontFamily="casual"-->
-                <!--android:gravity="center_vertical|center_horizontal"-->
-                <!--android:text="Participants"-->
-                <!--app:layout_constraintEnd_toEndOf="parent"-->
-                <!--app:layout_constraintHorizontal_bias="0.5"-->
-                <!--app:layout_constraintStart_toEndOf="@+id/grid_contacts"-->
-                <!--app:layout_constraintStart_toStartOf="parent"-->
-                <!--app:layout_constraintTop_toBottomOf="@+id/grid_items" />-->
+            <TextView
+                android:id="@+id/text_grid_contacts"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="casual"
+                android:gravity="center_vertical|center_horizontal"
+                android:text="Participants"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/grid_contacts"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/grid_items" />
 
-            <!--<GridView-->
-                <!--android:id="@+id/grid_contacts"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="match_parent"-->
+            <GridView
+                android:id="@+id/grid_contacts"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
 
-                <!--android:columnWidth="100dp"-->
-                <!--android:gravity="center"-->
-                <!--android:horizontalSpacing="10dp"-->
-                <!--android:numColumns="auto_fit"-->
-                <!--android:stretchMode="spacingWidthUniform"-->
-                <!--android:verticalSpacing="24dp"-->
+                android:columnWidth="100dp"
+                android:gravity="center"
+                android:horizontalSpacing="10dp"
+                android:numColumns="auto_fit"
+                android:stretchMode="spacingWidthUniform"
+                android:verticalSpacing="24dp"
 
-                <!--app:layout_constraintEnd_toEndOf="parent"-->
-                <!--app:layout_constraintHorizontal_bias="0.5"-->
-                <!--app:layout_constraintStart_toEndOf="@+id/button3"-->
-                <!--app:layout_constraintStart_toStartOf="parent"-->
-                <!--app:layout_constraintTop_toBottomOf="@+id/text_grid_contacts">-->
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/button3"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_grid_contacts">
 
-            <!--</GridView>-->
+            </GridView>
         </LinearLayout>
     </ScrollView>
 
@@ -140,14 +144,29 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:fontFamily="casual"
+        android:onClick="UpdatePurchase"
         android:text="Save Purchase"
         android:textAllCaps="false"
-        android:onClick="UpdatePurchase"
 
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/scroll" />
+        app:layout_constraintTop_toBottomOf="@+id/guideline2"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guideline1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="204dp" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guideline2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_end="51dp" />
 
 </android.support.constraint.ConstraintLayout>
